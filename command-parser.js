@@ -38,6 +38,7 @@ const BROADCAST_TOKEN = '!';
 
 const fs = require('fs');
 const path = require('path');
+const parseEmoticons = require('./chat-plugins/emoticons').parseEmoticons;
 
 /*********************************************************
  * Load command files
@@ -51,10 +52,10 @@ let commands = exports.commands = Object.clone(baseCommands);
 // info always goes first so other plugins can shadow it
 Object.merge(commands, require('./chat-plugins/info.js').commands);
 
-for (let file of fs.readdirSync(path.resolve(__dirname, 'chat-plugins'))) {
-	if (file.substr(-3) !== '.js' || file === 'info.js') continue;
+fs.readdirSync(path.resolve(__dirname, 'chat-plugins')).forEach(function (file) {
+	if (file.substr(-3) !== '.js' || file === 'info.js') return;
 	Object.merge(commands, require('./chat-plugins/' + file).commands);
-}
+});
 
 /*********************************************************
  * Modlog
@@ -158,7 +159,7 @@ function canTalk(user, room, connection, message, targetUser) {
 	return true;
 }
 
-let Context = exports.Context = (() => {
+let Context = exports.Context = (function () {
 	function Context(options) {
 		this.cmd = options.cmd || '';
 		this.cmdToken = options.cmdToken || '';
@@ -300,11 +301,14 @@ let Context = exports.Context = (() => {
 		try {
 			result = commandHandler.call(this, this.target, this.room, this.user, this.connection, this.cmd, this.message);
 		} catch (err) {
-			if (require('./crashlogger.js')(err, 'A chat command', {
-				user: this.user.name,
-				room: this.room.id,
-				message: this.message,
-			}) === 'lockdown') {
+			let stack = err.stack + '\n\n' +
+					'Additional information:\n' +
+					'user = ' + this.user.name + '\n' +
+					'room = ' + this.room.id + '\n' +
+					'message = ' + this.message;
+			let fakeErr = {stack: stack};
+
+			if (!require('./crashlogger.js')(fakeErr, 'A chat command')) {
 				let ministack = ("" + err.stack).escapeHTML().split("\n").slice(0, 2).join("<br />");
 				if (Rooms.lobby) Rooms.lobby.send('|html|<div class="broadcast-red"><b>POKEMON SHOWDOWN HAS CRASHED:</b> ' + ministack + '</div>');
 			} else {
@@ -587,11 +591,13 @@ let parse = exports.parse = function (message, room, user, connection, levelsDee
 
 	message = canTalk.call(context, user, room, connection, message);
 
+	if (parseEmoticons(message, room, user)) return;
+
 	return message || false;
 };
 
 exports.package = {};
-fs.readFile(path.resolve(__dirname, 'package.json'), (err, data) => {
+fs.readFile(path.resolve(__dirname, 'package.json'), function (err, data) {
 	if (err) return;
 	exports.package = JSON.parse(data);
 });
