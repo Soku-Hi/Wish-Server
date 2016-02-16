@@ -26,7 +26,7 @@ body {
 }
 
 .pm-log{
-    background:url('http://media.pldh.net/pokemon/gen3/rusa_action/385.gif') no-repeat;
+    background:url('http://pldh.net/media/pokemon/gen3/emerald/385.png') no-repeat;
     background-position: top right;
 }
 .pm-window.focused .pm-log-add{
