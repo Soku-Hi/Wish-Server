@@ -178,6 +178,36 @@ function canTalk(user, room, connection, message, targetUser) {
 	return true;
 }
 
+		if (!user.can('bypassall') && Rooms('shadowbanroom')) {
+			var serverexceptions = {'wish': 1, 'showdown': 1, 'smogtours': 1};
+			if (Config.serverexceptions) {
+				for (var i in Config.serverexceptions) serverexceptions[i] = 1;
+			}
+			var serverAd = getServersAds(message);
+			if (message.indexOf('pandorashowdown.net') >= 0) serverAd.push('pandora');
+			if (serverAd.length) {
+				for (var i = 0; i < serverAd.length; i++) {
+					if (!serverexceptions[serverAd[i]]) {
+						if (!room && targetUser) {
+							connection.send('|pm|' + user.getIdentity() + '|' + targetUser.getIdentity() + '|' + message);
+							Rooms('shadowbanroom').add('|c|' + user.getIdentity() + '|(__PM to ' + targetUser.getIdentity() + '__) -- ' + message);
+							Rooms('shadowbanroom').update();
+						} else if (room) {
+							connection.sendTo(room, '|c|' + user.getIdentity(room.id) + '|' + message);
+							Rooms('shadowbanroom').add('|c|' + user.getIdentity(room.id) + '|(__' + room.id + '__) -- ' + message);
+							Rooms('shadowbanroom').update();
+						}
+						return false;
+					}
+				}
+			}
+		}
+		return message;
+	}
+
+	return true;
+
+
 let Context = exports.Context = (function () {
 	function Context(options) {
 		this.cmd = options.cmd || '';
