@@ -20,12 +20,12 @@ exports.commands = {
             var username = target;
             var userid = toId(target);
             var online = false;
-            var avatar = (Config.customavatars[userid] ? serverIp + ":" + Config.port + "/avatars/" + Config.customavatars[userid] : "http://play.pokemonshowdown.com/sprites/trainers/167.png");
+            var avatar = (Config.customavatars[userid] ? serverIp + ":" + "/avatars/" + Config.customavatars[userid] : "http://play.pokemonshowdown.com/sprites/trainers/167.png");
         } else {
             var username = targetUser.name;
             var userid = targetUser.userid;
             var online = targetUser.connected;
-            var avatar = (isNaN(targetUser.avatar) ?  serverIp + ":" + Config.port + "/avatars/" + targetUser.avatar : "http://play.pokemonshowdown.com/sprites/trainers/" + targetUser.avatar + ".png");
+            var avatar = (isNaN(targetUser.avatar) ?  serverIp + ":" + "/avatars/" + targetUser.avatar : "http://play.pokemonshowdown.com/sprites/trainers/" + targetUser.avatar + ".png");
         }
  
         if (Users.usergroups[userid]) {
