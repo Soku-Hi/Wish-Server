@@ -484,6 +484,7 @@ User = (() => {
 	User.prototype.isStaff = false;
 	User.prototype.can = function (permission, target, room) {
 		if (this.hasSysopAccess()) return true;
+		if (permission === 'vip' && Users.vips[this.userid] && !target) return true;
 
 		let group = this.group;
 		let targetGroup = '';
