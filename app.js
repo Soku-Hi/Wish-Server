@@ -40,6 +40,9 @@
  *
  *   Used to abstract out network connections. sockets.js handles
  *   the actual server and connection set-up.
+ * Tells - from tells.js
+ *
+ *   Handles offline messaging.
  *
  * @license MIT license
  */
@@ -85,7 +88,7 @@ try {
 }
 
 if (Config.watchconfig) {
-	fs.watchFile(path.resolve(__dirname, 'config/config.js'), (curr, prev) => {
+	fs.watchFile(path.resolve(__dirname, 'config/config.js'), function (curr, prev) {
 		if (curr.mtime <= prev.mtime) return;
 		try {
 			delete require.cache[require.resolve('./config/config.js')];
@@ -113,6 +116,10 @@ global.Users = require('./users.js');
 
 global.Rooms = require('./rooms.js');
 
+global.Tells = require('./tells.js');
+
+global.Db = require('origindb')('config/db');
+
 delete process.send; // in case we're a child process
 global.Verifier = require('./verifier.js');
 
@@ -125,21 +132,24 @@ global.Tournaments = require('./tournaments');
 try {
 	global.Dnsbl = require('./dnsbl.js');
 } catch (e) {
-	global.Dnsbl = {query: () => {}, reverse: require('dns').reverse};
+	global.Dnsbl = {query: function () {}, reverse: require('dns').reverse};
 }
 
 global.Cidr = require('./cidr.js');
 
 if (Config.crashguard) {
 	// graceful crash - allow current battles to finish before restarting
-	process.on('uncaughtException', err => {
-		let crashMessage = require('./crashlogger.js')(err, 'The main process');
-		if (crashMessage !== 'lockdown') return;
+	let lastCrash = 0;
+	process.on('uncaughtException', function (err) {
+		let dateNow = Date.now();
+		let quietCrash = require('./crashlogger.js')(err, 'The main process', true);
+		quietCrash = quietCrash || ((dateNow - lastCrash) <= 1000 * 60 * 5);
+		lastCrash = Date.now();
+		if (quietCrash) return;
 		let stack = ("" + err.stack).escapeHTML().split("\n").slice(0, 2).join("<br />");
 		if (Rooms.lobby) {
 			Rooms.lobby.addRaw('<div class="broadcast-red"><b>THE SERVER HAS CRASHED:</b> ' + stack + '<br />Please restart the server.</div>');
-			Rooms.lobby.addRaw('<div class="broadcast-red">You will not be able to start new battles until the server restarts.</div>');
-			Rooms.lobby.update();
+			Rooms.lobby.addRaw('<div class="broadcast-red">You will not be able to talk in the lobby or start new battles until the server restarts.</div>');
 		}
 		Rooms.global.lockdown = true;
 	});
@@ -176,7 +186,7 @@ Rooms.global.formatListText = Rooms.global.getFormatListText();
 global.TeamValidator = require('./team-validator.js');
 
 // load ipbans at our leisure
-fs.readFile(path.resolve(__dirname, 'config/ipbans.txt'), (err, data) => {
+fs.readFile(path.resolve(__dirname, 'config/ipbans.txt'), function (err, data) {
 	if (err) return;
 	data = ('' + data).split("\n");
 	let rangebans = [];
@@ -196,4 +206,5 @@ fs.readFile(path.resolve(__dirname, 'config/ipbans.txt'), (err, data) => {
  * Start up the REPL server
  *********************************************************/
 
-require('./repl.js').start('app', cmd => eval(cmd));
+require('./repl.js').start('app', function (cmd) { return eval(cmd); });
+
