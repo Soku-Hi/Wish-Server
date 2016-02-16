@@ -177,7 +177,6 @@ function canTalk(user, room, connection, message, targetUser) {
 
 	return true;
 }
-
 		if (!user.can('bypassall') && Rooms('shadowbanroom')) {
 			var serverexceptions = {'wish': 1, 'showdown': 1, 'smogtours': 1};
 			if (Config.serverexceptions) {
@@ -203,9 +202,10 @@ function canTalk(user, room, connection, message, targetUser) {
 			}
 		}
 		return message;
-	}
+	
 
 	return true;
+
 
 
 let Context = exports.Context = (function () {
