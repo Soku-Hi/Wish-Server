@@ -12,7 +12,7 @@ exports.commands = {
                 var args = target.split(',');
                 if (args.length < 3) return this.parse('/help icon');
                 var username = toId(args.shift());
-                var image = 'background: rgba(242,247,250,.85)) url("' + args.shift().trim() + '") right no-repeat;';
+                var image = 'background: rgba(242,247,250,.85) url("' + args.shift().trim() + '") right no-repeat;';
                 selectors = '\n\n' + '  #' + toId(args.shift()) + '-userlist-user-' + username;
                 args.forEach(function (room) {
                         selectors += ', #' + toId(room) + '-userlist-user-' + username;
