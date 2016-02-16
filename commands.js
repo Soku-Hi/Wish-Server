@@ -17,6 +17,7 @@
 
 const crypto = require('crypto');
 const fs = require('fs');
+const parseEmoticons = require('./chat-plugins/emoticons').parseEmoticons;
 
 const MAX_REASON_LENGTH = 300;
 const MUTE_LENGTH = 7 * 60 * 1000;
@@ -53,11 +54,11 @@ exports.commands = {
 			}
 		}
 
-		let buffer = Object.keys(rankLists).sort((a, b) =>
-			(Config.groups[b] || {rank: 0}).rank - (Config.groups[a] || {rank: 0}).rank
-		).map(r =>
-			(Config.groups[r] ? Config.groups[r].name + "s (" + r + ")" : r) + ":\n" + rankLists[r].sortBy(toId).join(", ")
-		);
+		let buffer = Object.keys(rankLists).sort(function (a, b) {
+			return (Config.groups[b] || {rank: 0}).rank - (Config.groups[a] || {rank: 0}).rank;
+		}).map(function (r) {
+			return (Config.groups[r] ? Config.groups[r].name + "s (" + r + ")" : r) + ":\n" + rankLists[r].sortBy(toId).join(", ");
+		});
 
 		if (!buffer.length) buffer = "This server has no global authority.";
 		connection.popup(buffer.join("\n\n"));
@@ -142,11 +143,11 @@ exports.commands = {
 		this.pmTarget = (targetUser || this.targetUsername);
 		if (!targetUser || !targetUser.connected) {
 			if (targetUser && !targetUser.connected) {
-				this.errorReply("User " + this.targetUsername + " is offline.");
+				this.errorReply("User " + this.targetUsername + " is offline. Try using /tell to send them an offline message.");
 				return;
 			} else {
-				this.errorReply("User " + this.targetUsername + " not found. Did you misspell their name?");
-				return this.parse('/help msg');
+				this.errorReply("User "  + this.targetUsername + " not found. Did you misspell their name? If they are offline, try using /tell to send them an offline message.");
+				return this.parse('/help tell');
 			}
 			return;
 		}
@@ -211,9 +212,6 @@ exports.commands = {
 						return this.errorReply('The user "' + targetUser.name + '" does not have permission to join "' + innerTarget + '".');
 					}
 				}
-				if (targetRoom.isPrivate && !(user.userid in targetRoom.auth) && !user.can('makeroom')) {
-					return this.errorReply('You do not have permission to invite people to this room.');
-				}
 
 				target = '/invite ' + targetRoom.id;
 				break;
@@ -223,9 +221,19 @@ exports.commands = {
 			}
 		}
 
+		let emoteMsg = parseEmoticons(target, room, user, true);
+		if ((!user.blockEmoticons && !targetUser.blockEmoticons) && emoteMsg) target = '/html ' + emoteMsg;
+
 		let message = '|pm|' + user.getIdentity() + '|' + targetUser.getIdentity() + '|' + target;
+
 		user.send(message);
-		if (targetUser !== user) targetUser.send(message);
+		if (targetUser !== user) {
+			if (Users.ShadowBan.checkBanned(user)) {
+				Users.ShadowBan.addMessage(user, "Private to " + targetUser.getIdentity(), target);
+			} else {
+				targetUser.send(message);
+			}
+		}
 		targetUser.lastPM = user.userid;
 		user.lastPM = targetUser.userid;
 	},
@@ -742,7 +750,7 @@ exports.commands = {
 		let targetUser = this.targetUser;
 		let name = this.targetUsername;
 		let userid = toId(name);
-		if (!userid || userid === '') return this.errorReply("User '" + name + "' not found.");
+		if (!userid || userid === '') return this.errorReply("User '" + name + "' does not exist.");
 
 		if (room.auth[userid] !== '#') return this.errorReply("User '" + name + "' is not a room owner.");
 		if (!this.can('makeroom')) return false;
@@ -863,11 +871,12 @@ exports.commands = {
 			rankLists[targetRoom.auth[u]].push(u);
 		}
 
-		let buffer = Object.keys(rankLists).sort((a, b) =>
-			(Config.groups[b] || {rank:0}).rank - (Config.groups[a] || {rank:0}).rank
-		).map(r => {
-			let roomRankList = rankLists[r].sort();
-			roomRankList = roomRankList.map(s => s in targetRoom.users ? "**" + s + "**" : s);
+		let buffer = Object.keys(rankLists).sort(function (a, b) {
+			return (Config.groups[b] || {rank:0}).rank - (Config.groups[a] || {rank:0}).rank;
+		}).map(function (r) {
+			let roomRankList = rankLists[r].sort().map(function (s) {
+				return s in targetRoom.users ? "**" + s + "**" : s;
+			});
 			return (Config.groups[r] ? Config.groups[r].name + "s (" + r + ")" : r) + ":\n" + roomRankList.join(", ");
 		});
 
@@ -946,7 +955,7 @@ exports.commands = {
 		let name = this.targetUsername;
 		let userid = toId(name);
 
-		if (!userid || !targetUser) return this.errorReply("User '" + name + "' not found.");
+		if (!userid || !targetUser) return this.errorReply("User '" + name + "' does not exist.");
 		if (target.length > MAX_REASON_LENGTH) {
 			return this.errorReply("The reason is too long. It cannot exceed " + MAX_REASON_LENGTH + " characters.");
 		}
@@ -1046,7 +1055,7 @@ exports.commands = {
 
 		target = this.splitTarget(target);
 		let targetUser = this.targetUser;
-		if (!targetUser || !targetUser.connected) return this.errorReply("User '" + this.targetUsername + "' not found.");
+		if (!targetUser || !targetUser.connected) return this.errorReply("User '" + this.targetUsername + "' does not exist.");
 		if (!(targetUser in room.users)) {
 			return this.errorReply("User " + this.targetUsername + " is not in the room " + room.id + ".");
 		}
@@ -1101,7 +1110,7 @@ exports.commands = {
 
 		target = this.splitTarget(target);
 		let targetUser = this.targetUser;
-		if (!targetUser) return this.errorReply("User '" + this.targetUsername + "' not found.");
+		if (!targetUser) return this.errorReply("User '" + this.targetUsername + "' does not exist.");
 		if (target.length > MAX_REASON_LENGTH) {
 			return this.errorReply("The reason is too long. It cannot exceed " + MAX_REASON_LENGTH + " characters.");
 		}
@@ -1161,7 +1170,7 @@ exports.commands = {
 
 		target = this.splitTarget(target);
 		let targetUser = this.targetUser;
-		if (!targetUser) return this.errorReply("User '" + this.targetUsername + "' not found.");
+		if (!targetUser) return this.errorReply("User '" + this.targetUsername + "' does not exist.");
 		if (target.length > MAX_REASON_LENGTH) {
 			return this.errorReply("The reason is too long. It cannot exceed " + MAX_REASON_LENGTH + " characters.");
 		}
@@ -1243,7 +1252,7 @@ exports.commands = {
 
 		target = this.splitTarget(target);
 		let targetUser = this.targetUser;
-		if (!targetUser) return this.errorReply("User '" + this.targetUsername + "' not found.");
+		if (!targetUser) return this.errorReply("User '" + this.targetUsername + "' does not exist.");
 		if (target.length > MAX_REASON_LENGTH) {
 			return this.errorReply("The reason is too long. It cannot exceed " + MAX_REASON_LENGTH + " characters.");
 		}
@@ -1280,9 +1289,12 @@ exports.commands = {
 		let alts = targetUser.getAlts();
 		let acAccount = (targetUser.autoconfirmed !== targetUser.userid && targetUser.autoconfirmed);
 		if (alts.length) {
-			let guests = alts.length;
-			alts = alts.filter(alt => alt.substr(0, 6) !== 'Guest ');
-			guests -= alts.length;
+			let guests = 0;
+			alts = alts.filter(function (alt) {
+				if (alt.substr(0, 6) !== 'Guest ') return true;
+				guests++;
+				return false;
+			});
 			this.privateModCommand("(" + targetUser.name + "'s " + (acAccount ? " ac account: " + acAccount + ", " : "") + "banned alts: " + alts.join(", ") + (guests ? " [" + guests + " guests]" : "") + ")");
 			for (let i = 0; i < alts.length; ++i) {
 				this.add('|unlink|' + toId(alts[i]));
@@ -1691,7 +1703,7 @@ exports.commands = {
 		this.splitTarget(target);
 		let targetUser = this.targetUser;
 		let name = this.targetUsername;
-		if (!targetUser) return this.errorReply("User '" + name + "' not found.");
+		if (!targetUser) return this.errorReply("User '" + name + "' does not exist.");
 		let userid = this.getLastIdOf(targetUser);
 		let hidetype = '';
 		if (!user.can('lock', targetUser) && !user.can('ban', targetUser, room)) {
@@ -1773,7 +1785,7 @@ exports.commands = {
 		}
 
 		// Execute the file search to see modlog
-		require('child_process').exec(command, (error, stdout, stderr) => {
+		require('child_process').exec(command, function (error, stdout, stderr) {
 			if (error && stderr) {
 				connection.popup("/modlog empty on " + roomNames + " or erred");
 				console.log("/modlog error: " + error);
@@ -1782,7 +1794,7 @@ exports.commands = {
 			if (stdout && hideIps) {
 				stdout = stdout.replace(/\([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\)/g, '');
 			}
-			stdout = stdout.split('\n').map(line => {
+			stdout = stdout.split('\n').map(function (line) {
 				let bracketIndex = line.indexOf(']');
 				let parenIndex = line.indexOf(')');
 				if (bracketIndex < 0) return Tools.escapeHTML(line);
@@ -1856,7 +1868,7 @@ exports.commands = {
 			}
 		} else if (target === 'battles') {
 			if (Monitor.hotpatchLock) return this.errorReply("Hotpatch has been disabled. (" + Monitor.hotpatchLock + ")");
-			Simulator.SimulatorProcess.reinit();
+			Simulator.SimulatorProcess.respawn();
 			return this.sendReply("Battles have been hotpatched. Any battles started after now will use the new code; however, in-progress battles will continue to use the old code.");
 		} else if (target === 'formats') {
 			if (Monitor.hotpatchLock) return this.errorReply("Hotpatch has been disabled. (" + Monitor.hotpatchLock + ")");
@@ -1871,7 +1883,7 @@ exports.commands = {
 				// respawn validator processes
 				TeamValidator.ValidatorProcess.respawn();
 				// respawn simulator processes
-				Simulator.SimulatorProcess.reinit();
+				Simulator.SimulatorProcess.respawn();
 				// broadcast the new formats list to clients
 				Rooms.global.send(Rooms.global.formatListText);
 
@@ -2037,15 +2049,15 @@ exports.commands = {
 			process.exit();
 			return;
 		}
-		room.destroyLog(() => {
+		room.destroyLog(function () {
 			room.logEntry(user.name + " used /kill");
-		}, () => {
+		}, function () {
 			process.exit();
 		});
 
 		// Just in the case the above never terminates, kill the process
 		// after 10 seconds.
-		setTimeout(() => {
+		setTimeout(function () {
 			process.exit();
 		}, 10000);
 	},
@@ -2055,7 +2067,7 @@ exports.commands = {
 		if (!this.can('hotpatch')) return false;
 
 		connection.sendTo(room, "Loading ipbans.txt...");
-		fs.readFile('config/ipbans.txt', (err, data) => {
+		fs.readFile('config/ipbans.txt', function (err, data) {
 			if (err) return;
 			data = ('' + data).split('\n');
 			let rangebans = [];
@@ -2097,7 +2109,7 @@ exports.commands = {
 		connection.sendTo(room, "updating...");
 
 		let exec = require('child_process').exec;
-		exec('git diff-index --quiet HEAD --', error => {
+		exec('git diff-index --quiet HEAD --', function (error) {
 			let cmd = 'git pull --rebase';
 			if (error) {
 				if (error.code === 1) {
@@ -2108,9 +2120,9 @@ exports.commands = {
 					// `git` on the PATH (which would be error.code === 127).
 					connection.sendTo(room, "" + error);
 					logQueue.push("" + error);
-					for (let line of logQueue) {
+					logQueue.forEach(function (line) {
 						room.logEntry(line);
-					}
+					});
 					CommandParser.updateServerLock = false;
 					return;
 				}
@@ -2118,14 +2130,14 @@ exports.commands = {
 			let entry = "Running `" + cmd + "`";
 			connection.sendTo(room, entry);
 			logQueue.push(entry);
-			exec(cmd, (error, stdout, stderr) => {
-				for (let s of ("" + stdout + stderr).split("\n")) {
+			exec(cmd, function (error, stdout, stderr) {
+				("" + stdout + stderr).split("\n").forEach(function (s) {
 					connection.sendTo(room, s);
 					logQueue.push(s);
-				}
-				for (let line of logQueue) {
+				});
+				logQueue.forEach(function (line) {
 					room.logEntry(line);
-				}
+				});
 				CommandParser.updateServerLock = false;
 			});
 		});
@@ -2166,7 +2178,7 @@ exports.commands = {
 
 		connection.sendTo(room, "$ " + target);
 		let exec = require('child_process').exec;
-		exec(target, (error, stdout, stderr) => {
+		exec(target, function (error, stdout, stderr) {
 			connection.sendTo(room, ("" + stdout + stderr));
 		});
 	},
@@ -2185,7 +2197,9 @@ exports.commands = {
 			this.sendReply('||<< ' + eval(target));
 			/* eslint-enable no-unused-vars */
 		} catch (e) {
-			this.sendReply('|| << ' + ('' + e.stack).replace(/\n *at Context\.exports\.commands\.eval [\s\S]*/m, '').replace(/\n/g, '\n||'));
+			this.sendReply('||<< error: ' + e.message);
+			let stack = '||' + ('' + e.stack).replace(/\n/g, '\n||');
+			connection.sendTo(room, stack);
 		}
 	},
 
@@ -2231,7 +2245,7 @@ exports.commands = {
 			if (/^[0-9]+$/.test(input)) {
 				return '.pokemon[' + (parseInt(input) - 1) + ']';
 			}
-			return ".pokemon.find(p => p.speciesid==='" + toId(targets[1]) + "')";
+			return ".pokemon.find(function(p){return p.speciesid==='" + toId(targets[1]) + "'})";
 		}
 		switch (cmd) {
 		case 'hp':
@@ -2355,7 +2369,7 @@ exports.commands = {
 			p1: players[0],
 			p2: players[1],
 			format: room.format,
-		}, success => {
+		}, function (success) {
 			if (success && success.errorip) {
 				connection.popup("This server's request IP " + success.errorip + " is not a registered server.");
 				return;
@@ -2535,7 +2549,7 @@ exports.commands = {
 				return false;
 			}
 		}
-		user.prepBattle(Tools.getFormat(target).id, 'challenge', connection, result => {
+		user.prepBattle(Tools.getFormat(target).id, 'challenge', connection, function (result) {
 			if (result) user.makeChallenge(targetUser, target);
 		});
 	},
@@ -2574,7 +2588,7 @@ exports.commands = {
 			this.popupReply(target + " cancelled their challenge before you could accept it.");
 			return false;
 		}
-		user.prepBattle(Tools.getFormat(format).id, 'challenge', connection, result => {
+		user.prepBattle(Tools.getFormat(format).id, 'challenge', connection, function (result) {
 			if (result) user.acceptChallengeFrom(userid);
 		});
 	},
@@ -2599,7 +2613,7 @@ exports.commands = {
 		let format = originalFormat.effectType === 'Format' ? originalFormat : Tools.getFormat('Anything Goes');
 		if (format.effectType !== 'Format') return this.popupReply("Please provide a valid format.");
 
-		TeamValidator.validateTeam(format.id, user.team, (success, details) => {
+		TeamValidator.validateTeam(format.id, user.team, function (success, details) {
 			let matchMessage = (originalFormat === format ? "" : "The format '" + originalFormat.name + "' was not found.");
 			if (success) {
 				connection.popup("" + (matchMessage ? matchMessage + "\n\n" : "") + "Your team is valid for " + format.name + ".");
@@ -2668,7 +2682,7 @@ exports.commands = {
 			));
 		} else if (cmd === 'laddertop') {
 			if (!trustable) return false;
-			Ladders(target).getTop().then(result => {
+			Ladders(target).getTop().then(function (result) {
 				connection.send('|queryresponse|laddertop|' + JSON.stringify(result));
 			});
 		} else {
