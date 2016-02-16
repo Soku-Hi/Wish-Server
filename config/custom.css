@@ -1,0 +1,155 @@
+/*main css*/
+
+body {
+    background: url('http://pokewalls.files.wordpress.com/2011/07/385jirachi2-1920x1080.jpg')!important;
+}
+
+.chat-log{
+    background:url('http://pldh.net/media/dreamworld/385.png') no-repeat;
+    background-position:top right;
+}
+
+.pm-log-add{
+    background:#d9d9d9;
+}
+
+.pm-window h3{
+    background:#d9d9d9 url('http://pldh.net/media/pokexycons/385.png') bottom left no-repeat;
+    text-align:center;
+    background-position:225px;
+}
+
+.pm-window.focused h3{
+   background:#d9d9d9 url('http://pldh.net/media/pokexycons/385.png') bottom left no-repeat;
+    text-align:center;
+    background-position:225px;
+}
+
+.pm-log{
+    background:url('http://media.pldh.net/pokemon/gen3/rusa_action/385.gif') no-repeat;
+    background-position: top right;
+}
+.pm-window.focused .pm-log-add{
+    background:#e6e6e6;
+}
+
+.button{
+    background:#d9d9d9!important;
+    font-style:italic!important;
+    border:black 1px solid;
+    color:black!important;
+}
+
+.teamlist .team {
+    background: black;
+    color: #d9d9d9;
+}
+.folderpane h3 {
+    background: #d9d9d9;
+}
+.folder .selectFolder {
+    background: #d9d9d9;
+}
+.folderlist .foldersep:before {
+    background: #d9d9d9;
+}
+.setcell-details {
+    background: #d9d9d9;
+}
+.setchart {
+    background: #d9d9d9;
+}
+.setchart-nickname label {
+    background: #d9d9d9;
+}
+.utilichart h3 {
+    background: black;
+    color: #d9d9d9;
+}
+.pokemonedit {
+    background: #d9d9d9;
+    color: black;
+}
+.pokemonedit:hover,
+.pokemonedit.focused {
+    background: black;
+    color: #d9d9d9;
+}
+.select,
+.team {
+    background: black;
+    color: #d9d9d9;
+}
+.select:hover,
+.team:hover {
+    background: #d9d9d9;
+    color: black;
+}
+.broadcast-blue {
+    background: black;
+    color: #d9d9d9;
+    text-align: center;
+}
+.broadcast-green {
+    background: black;
+    color: #d9d9d9;
+    text-align: center;
+}
+.broadcast-red {
+    background: black;
+    color: #d9d9d9;
+    text-align: center;
+}
+                                         
+.chat-log-add{
+    background:#d9d9d9;
+}
+
+.roomlist a.ilink{
+    background:#d9d9d9;
+    text-align:center;
+    color:black;
+}
+
+.mainmenuwrapper{
+    background:url('http://i.imgur.com/D038iEi.png') no-repeat;
+    background-position: bottom left;
+}
+
+.battle-log {
+    background:#d9d9d9;
+}
+
+.battle-log h2{
+    color:#d9d9d9;
+    background:black;
+    font-style:italic!important;
+    text-align:center;
+}
+
+.rightbar, .leftbar{
+    background:#d9d9d9;
+}
+
+.battle-log-add{
+    background:#d9d9d9;
+}
+
+.ps-room.ps-room-opaque{
+    background:#d9d9d9;
+}
+
+.ps-room .battle-controls{
+    background:#d9d9d9;
+}
+
+.backdrop{
+    background:url('https://globalunison.files.wordpress.com/2012/07/meteor.jpg')!important;
+}
+
+
+.ps-popup{
+    background:#d9d9d9;
+}
+                                            
+         
