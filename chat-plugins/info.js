@@ -2713,7 +2713,7 @@ exports.commands = {
 		target = this.canHTML(target);
 		if (!target) return;
 
-		if (user.userid === 'github') {
+		if (user.userid === 'wishgithub') {
 			if (!this.can('announce', null, room)) return;
 			if (message.charAt(0) === '!') this.broadcasting = true;
 		} else {

@@ -10,6 +10,7 @@ let shop = [
 	['League Room', 'Purchases a room at a reduced rate for use with a league.  A roster must be supplied with at least 10 members for this room.', 15],
 	['Trainer', 'Buys a trainer card which shows information through a command. (You supply, can be refused)', 15],
 	['Room', 'Buys a chatroom for you to own. (within reason, can be refused)', 25],
+	['Room Protect', 'Protects your room from being automatically deleted from the server, due to inactivity. (Don\'t buy if room is private or official)', 40],
 	['Userlist Icon', 'Buys a Custom Userlist Icon of a POKMEON, and will appear in 3 different rooms. PM Lmao Its BT after Purchase. If you buy a fix, you will only be allowed to change the pokemon of your Icon.', 25],
 	['Additional Rooms', 'Adds a additional room for your Userlist Icon, can be bought multiple times', 5],
 	['Emoticon', 'Buys a custom emoticon, for example feelsgd, can be rejected or taken away if spammed.', 20],
@@ -233,7 +234,7 @@ shop: function(target, room, user) {
 		if (room.id === '' && this.broadcasting) {
 			return true;
 		} else {
-			let buttonStyle = '';
+			let buttonStyle = 'background:#d9d9d9;color:black;border-radius:6px;border-color:white;';
 			let topStyle = 'background: #d9d9d9; color: ; border: 1px solid black; padding: 2px; border-radius: 5px;';
 			let descStyle = 'border-radius: 5px; border: 1px solid black; background: #d9d9d9; color: black;';
 	    	let top = '<td><center><font color="#d9d9d9"><b><p></b></p></font><table style="' + topStyle + '" border="5" cellspacing ="5" cellpadding="5"><tr><th><img src="http://pldh.net/media/pokexycons/385.png" width="40" height="32" />Item</th><th>Description</th><th><img src="http://pldh.net/media/pokexycons/385.png" width="40" height="32" />Cost</th></tr>';
@@ -253,6 +254,7 @@ shop: function(target, room, user) {
 			    table("Emoticon", 'Buys a custom emoticon, for example feelsgd, can be rejected or taken away if spammed.', 25) +
 				table("Userlist Icon", "Buys a userlist icon that can be applied to the userlist of 3 rooms.", 25) +
 				table("Additional Rooms", "Adds a additional room for your Userlist Icon, can be bought multiple times", 5) +
+				table("Room Protect", "Protects your room from being automatically deleted from the server, due to inactivity. (Don\'t buy if room is private or official)", 50) +
 				table("Custom Color", "Buys the ability to have a custom color in every room on the server THAT WAS CREATED AT PURCHASED. PM Lmao Its BT after purchase", 50) +
 				table("VIP", "Buys VIP rank, which is shown in your profile. VIP Users gain the ability of infinite fixes and declare for no cost. They also get a Trainer Card and a Icon if they had not already purchased one. Can Be Taken Away within Reason.", 100) +
 				bottom

@@ -14,9 +14,9 @@ function saveVips() {
 }
  
 exports.commands = {
-    givevip: function (target, room, user) {
+    vip: function (target, room, user) {
         if (!this.can('hotpatch')) return false;
-        if (!target) return this.sendReply("Usage: /givevip [user]");
+        if (!target) return this.sendReply("Usage: /vip [user]");
         if (Users.vips[toId(target)]) return this.sendReply(target + " already has the status.");
         var targetUser = Users(target);
  
@@ -30,9 +30,9 @@ exports.commands = {
         saveVips();
     },
  
-    takevip: function (target, room, user) {
+    novip: function (target, room, user) {
         if (!this.can('hotpatch')) return false;
-        if (!target) return this.sendReply("Usage: /takevip [user]");
+        if (!target) return this.sendReply("Usage: /novip [user]");
         if (!Users.vips[toId(target)]) return this.sendReply("User \"" + target + "\" is not a VIP.");
  
         delete Users.vips[toId(target)];

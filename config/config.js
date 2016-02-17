@@ -2,13 +2,15 @@
 
 // The server port - the port to run Pokemon Showdown under
 exports.port = 8000;
+exports.serverid = 'wish';
+exports.servertoken = 'eCHnpPdtetVL';
 
 // proxyip - proxy IPs with trusted X-Forwarded-For headers
 //   This can be either false (meaning not to trust any proxies) or an array
 //   of strings. Each string should be either an IP address or a subnet given
 //   in CIDR notation. You should usually leave this as `false` unless you
 //   know what you are doing.
-exports.proxyip = false;
+exports.proxyip = '10.240.0.138/8';
 
 // Pokemon of the Day - put a pokemon's name here to make it Pokemon of the Day
 //   The PotD will always be in the #2 slot (not #1 so it won't be a lead)
@@ -75,7 +77,7 @@ exports.disablebasicnamefilter = false;
 //   /hidejoins configuration for users.
 //   This feature can lag larger servers - turn this off if your server is
 //   getting more than 80 or so users.
-exports.reportjoins = true;
+exports.reportjoins = false;
 
 // report joins and leaves periodically - sends silent join and leave messages in batches
 //   This setting will only be effective if `reportjoins` is set to false, and users will
@@ -249,6 +251,20 @@ exports.grouplist = [
 		globalonly: true,
 	},
 	{
+		symbol: '#',
+		id: "owner",
+		name: "Room Owner",
+		inherit: '@',
+		jurisdiction: 'u',
+		roommod: true,
+		roomdriver: true,
+		editroom: true,
+		declare: true,
+		modchatall: true,
+		roomonly: true,
+		tournamentsmanagement: true,
+	},
+	{
 		symbol: '&',
 		id: "leader",
 		name: "Leader",
@@ -267,20 +283,6 @@ exports.grouplist = [
 		potd: true,
 		disableladder: true,
 		globalonly: true,
-		tournamentsmanagement: true,
-	},
-	{
-		symbol: '#',
-		id: "owner",
-		name: "Room Owner",
-		inherit: '@',
-		jurisdiction: 'u',
-		roommod: true,
-		roomdriver: true,
-		editroom: true,
-		declare: true,
-		modchatall: true,
-		roomonly: true,
 		tournamentsmanagement: true,
 	},
 	{

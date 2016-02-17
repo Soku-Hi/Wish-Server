@@ -9,6 +9,7 @@ let emotes = {
 	'feelsbd': 'http://i.imgur.com/YyEdmwX.png',
 	'feelsbm': 'http://i.imgur.com/xwfJb2z.png',
 	'feelsbn': 'http://i.imgur.com/wp51rIg.png',
+	'feelsbt': 'http://i.imgur.com/rghiV9b.png',
 	'feelsdd': 'http://i.imgur.com/fXtdLtV.png',
 	'feelsdoge': 'http://i.imgur.com/GklYWvi.png',
 	'feelsgd': 'http://i.imgur.com/Jf0n4BL.png',
